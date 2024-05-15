@@ -214,5 +214,6 @@ def generate_exam(course: CourseInfo):
 
 # For local testing outside of the FastAPI
 if __name__ == "__main__":
-    load_dotenv()
-    generate_exam(CourseInfo(vak="Computer Science", onderwerp="Artificial Intelligence", duur="8 weeks", ects=5, voorkennis="Python programming", taal="English", api_key=os.environ['REPLICATE_API_TOKEN']))
+    # load_dotenv()
+    # generate_exam(CourseInfo(vak="Computer Science", onderwerp="Artificial Intelligence", duur="8 weeks", ects=5, voorkennis="Python programming", taal="English", api_key=os.environ['REPLICATE_API_TOKEN']))
+    uvicorn.run(app, host="0.0.0.0", port=8000)

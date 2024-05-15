@@ -29,4 +29,5 @@ ENV PATH /opt/conda/envs/ema/bin:$PATH
 EXPOSE 8000
 
 # Run the command to start uvicorn
-CMD ["uvicorn", "ema:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+# CMD ["uvicorn", "ema:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+CMD ["python", "ema.py"]
