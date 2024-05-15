@@ -1,9 +1,25 @@
+from fastapi import FastAPI
+from pydantic import BaseModel
+from typing import Literal
 import replicate
 import os
 import json
-import json
 import time
 from dotenv import load_dotenv
+
+app = FastAPI()
+
+class CourseInfo(BaseModel):
+    vak: str
+    onderwerp: str
+    duur: str
+    ects: int
+    voorkennis: str
+    taal: str
+
+@app.get("/")
+def read_root():
+    return {"message": "Welcome to the EMA API"}
 
 def get_system_prompt():
     return ("Your Role: As an experienced and excellent university lecturer, you deliver high-quality educational material extremely quickly, "
@@ -42,14 +58,14 @@ def read_course_data(file_path):
     return data_course
 
 def create_prompt_lesson_plan(course):
-    prompt = f"""Give me an extensive well written lesson plan for the course {course['vak']}, the module 
-           takes {course['duur']} and the course consists of {course['ects']} ECTS. Students have the 
-           folllowing prior/foreknowledge knowledge: {course['voorkennis']}. Finally present it in {course['taal']}. 
-           It is very important that the whole answer is translated in {course['taal']}."""
+    prompt = f"""Give me an extensive well written lesson plan for the course {course.vak}, the module 
+           takes {course.duur} and the course consists of {course.ects} ECTS. Students have the 
+           folllowing prior/foreknowledge knowledge: {course.voorkennis}. Finally present it in {course.taal}. 
+           It is very important that the whole answer is translated in {course.taal}."""
     return prompt
 
 def create_prompt_lesson(course):
-    prompt = f"""As an expert in {course['vak']}, create a 90-minute lesson for HBO students on {course['onderwerp']} with clear learning objectives:
+    prompt = f"""As an expert in {course.vak}, create a 90-minute lesson for HBO students on {course.onderwerp} with clear learning objectives:
 
     1. Introduction (10 mins): Introduce the topic, its relevance, goals, and learning outcomes.
     2. Core (60 mins):
@@ -64,12 +80,11 @@ def create_prompt_lesson(course):
     - Provide practical examples and tips.
     - Include visual, auditory, and kinesthetic elements.
 
-    Design the lesson according to this structure and present it in {course['taal']}."""
+    Design the lesson according to this structure and present it in {course.taal}."""
     return prompt
 
-
 def create_prompt_assignment(course):
-    prompt = f"""As an expert in {course['vak']}, create an HBO-level assignment on {course['onderwerp']} that is challenging and relevant. 
+    prompt = f"""As an expert in {course.vak}, create an HBO-level assignment on {course.onderwerp} that is challenging and relevant. 
         The assignment should include:
             1. Introduction:
             - Overview of the topic and its importance.
@@ -95,13 +110,13 @@ def create_prompt_assignment(course):
             - Opportunities for knowledge and practical skills demonstration.
             - Encourage critical thinking and problem-solving.
 
-            Design the assignment according to these guidelines and present it in {course['taal']}."""
+            Design the assignment according to these guidelines and present it in {course.taal}."""
 
     return prompt
 
 def create_prompt_formative_exam(course):
-    prompt = f"""As an expert in {course['vak']}, create formative exam questions for HBO students on the topic of {course['onderwerp']}. 
-        Very important! Every question should be translated in {course['taal']}
+    prompt = f"""As an expert in {course.vak}, create formative exam questions for HBO students on the topic of {course.onderwerp}. 
+        Very important! Every question should be translated in {course.taal}
         The questions should be designed to assess understanding and provide feedback for improvement. Ensure the exam includes the following elements:
             1. Question Types:
             - A mix of multiple-choice, short answer, and essay questions.
@@ -121,18 +136,19 @@ def create_prompt_formative_exam(course):
             - Provide a rubric for evaluating answers.
 
             **Specific Guidelines**:
-            - Present it in {course['taal']} language
+            - Present it in {course.taal} language
             - Ensure the questions are appropriate for HBO-level students.
             - Use clear and understandable language.
             - Cover a range of difficulty levels to differentiate student understanding.
             - Encourage application of knowledge to practical situations.
 
-            Design the exam questions according to these guidelines. Very important! The whole text and every question should be shown in {course['taal']}
+            Design the exam questions according to these guidelines. Very important! The whole text and every question should be shown in {course.taal}
             """
     return prompt
 
 
 def streamed_reply_llama3(prompt, system_prompt):
+    all_events = ""
     # The meta/meta-llama-3-70b-instruct model can stream output as it's running.
     start_time = time.time()
     for event in replicate.stream(
@@ -151,57 +167,52 @@ def streamed_reply_llama3(prompt, system_prompt):
         },
     ):
         print(str(event), end="")
-    end_time = time.time()
-    execution_time = end_time - start_time
-    print(f"\nExecution time: {execution_time} seconds")
-
-def complete_reply_llama3(prompt, system_prompt):
-    # The meta/meta-llama-3-70b-instruct model can complete the prompt in one go.
-    all_events = ""
-
-    start_time = time.time()
-
-    for event in replicate.stream(
-        "meta/meta-llama-3-70b-instruct",
-        input={
-            "top_k": 50,
-            "top_p": 0.9,
-            "prompt": prompt,
-            "max_tokens": 3000,
-            "min_tokens": 0,
-            "temperature": 0.1,
-            "prompt_template": "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n{system_prompt}<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n{prompt}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n",
-            "presence_penalty": 1.15,
-            "frequency_penalty": 0.2
-        },
-        ):
         all_events += str(event)
 
     end_time = time.time()
     execution_time = end_time - start_time
     print(f"\nExecution time: {execution_time} seconds")
-    print(all_events)
 
-    return all_events
+    # Convert all_events string (completion) to a dictionary
+    output = {"completion": all_events}
+    return output
 
-if __name__ == "__main__":
+@app.post("/generate-lesson-plan/")
+def generate_lesson_plan(course: CourseInfo):
     load_dotenv()
-    course_info_json = "example_course.json"  # Replace with the actual path to the course info JSON file
-    course = read_course_data(course_info_json)
     system_prompt = get_system_prompt()
-
-    option = input("What would you like to create? (lesson plan/lesson/assignment/exam): ")
-    
-    if option == "lesson plan":
-        prompt = create_prompt_lesson_plan(course)
-    elif option == "lesson":
-        prompt = create_prompt_lesson(course)
-    elif option == "assignment":
-        prompt = create_prompt_assignment(course)
-    elif option == "exam":
-        prompt = create_prompt_formative_exam(course)
-    else:
-        print("Invalid option. Please choose 'lesson plan', 'lesson', 'assignment', or 'exam'.")
-    
+    prompt = create_prompt_lesson_plan(course)
     print("Prompt:", prompt)
-    streamed_reply_llama3(prompt, system_prompt)
+    response_json = streamed_reply_llama3(prompt, system_prompt)
+    return response_json
+
+@app.post("/generate-lesson/")
+def generate_lesson(course: CourseInfo):
+    load_dotenv()
+    system_prompt = get_system_prompt()
+    prompt = create_prompt_lesson(course)
+    print("Prompt:", prompt)
+    response_json = streamed_reply_llama3(prompt, system_prompt)
+    return response_json
+
+@app.post("/generate-assignment/")
+def generate_assignment(course: CourseInfo):
+    load_dotenv()
+    system_prompt = get_system_prompt()
+    prompt = create_prompt_assignment(course)
+    print("Prompt:", prompt)
+    response_json = streamed_reply_llama3(prompt, system_prompt)
+    return response_json
+
+@app.post("/generate-exam/")
+def generate_exam(course: CourseInfo):
+    load_dotenv()
+    system_prompt = get_system_prompt()
+    prompt = create_prompt_formative_exam(course)
+    print("Prompt:", prompt)
+    response_json = streamed_reply_llama3(prompt, system_prompt)
+    return response_json
+
+# For local testing outside of the FastAPI
+if __name__ == "__main__":
+    generate_exam(CourseInfo(vak="Computer Science", onderwerp="Artificial Intelligence", duur="8 weeks", ects=5, voorkennis="Python programming", taal="English"))
