@@ -16,6 +16,7 @@ class CourseInfo(BaseModel):
     ects: int
     voorkennis: str
     taal: str
+    api_key: str
 
 @app.get("/")
 def read_root():
@@ -174,7 +175,7 @@ def streamed_reply_llama3(prompt, system_prompt):
 
 @app.post("/generate-lesson-plan/")
 def generate_lesson_plan(course: CourseInfo):
-    load_dotenv()
+    os.environ['REPLICATE_API_TOKEN'] = course.api_key
     system_prompt = get_system_prompt()
     prompt = create_prompt_lesson_plan(course)
     print("Prompt:", prompt)
@@ -183,7 +184,7 @@ def generate_lesson_plan(course: CourseInfo):
 
 @app.post("/generate-lesson/")
 def generate_lesson(course: CourseInfo):
-    load_dotenv()
+    os.environ['REPLICATE_API_TOKEN'] = course.api_key
     system_prompt = get_system_prompt()
     prompt = create_prompt_lesson(course)
     print("Prompt:", prompt)
@@ -192,7 +193,7 @@ def generate_lesson(course: CourseInfo):
 
 @app.post("/generate-assignment/")
 def generate_assignment(course: CourseInfo):
-    load_dotenv()
+    os.environ['REPLICATE_API_TOKEN'] = course.api_key
     system_prompt = get_system_prompt()
     prompt = create_prompt_assignment(course)
     print("Prompt:", prompt)
@@ -201,7 +202,7 @@ def generate_assignment(course: CourseInfo):
 
 @app.post("/generate-exam/")
 def generate_exam(course: CourseInfo):
-    load_dotenv()
+    os.environ['REPLICATE_API_TOKEN'] = course.api_key
     system_prompt = get_system_prompt()
     prompt = create_prompt_formative_exam(course)
     print("Prompt:", prompt)
@@ -210,4 +211,5 @@ def generate_exam(course: CourseInfo):
 
 # For local testing outside of the FastAPI
 if __name__ == "__main__":
-    generate_exam(CourseInfo(vak="Computer Science", onderwerp="Artificial Intelligence", duur="8 weeks", ects=5, voorkennis="Python programming", taal="English"))
+    load_dotenv()
+    generate_exam(CourseInfo(vak="Computer Science", onderwerp="Artificial Intelligence", duur="8 weeks", ects=5, voorkennis="Python programming", taal="English", api_key=os.environ['REPLICATE_API_TOKEN']))
