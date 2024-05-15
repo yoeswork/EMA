@@ -6,6 +6,8 @@ import os
 import json
 import time
 from dotenv import load_dotenv
+#adding uvicorn for loading
+import uvicorn
 
 app = FastAPI()
 
@@ -208,6 +210,7 @@ def generate_exam(course: CourseInfo):
     print("Prompt:", prompt)
     response_json = streamed_reply_llama3(prompt, system_prompt)
     return response_json
+
 
 # For local testing outside of the FastAPI
 if __name__ == "__main__":
