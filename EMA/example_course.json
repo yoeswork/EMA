@@ -1,0 +1,10 @@
+{
+  "course": {
+    "vak": "Marketing",
+    "duur": "8 weken",
+    "taal": "Nederlands",
+    "ects": "6",
+    "voorkennis": "Middelbare school niveau havo 5",
+    "onderwerp": "Sales"
+  }
+}
