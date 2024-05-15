@@ -1,0 +1,31 @@
+# Start with a base image containing Miniconda (Python 3.10)
+FROM continuumio/miniconda3:4.10.3
+
+# Set the working directory in the container to /app
+WORKDIR /app
+
+# Add the current directory contents into the container at /app
+ADD . /app
+
+# Install build tools and cmake ##FOR LLAMA
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    cmake \
+    && rm -rf /var/lib/apt/lists/*
+# Create a new conda environment with Python 3.10
+RUN conda create -y -n ema python=3.10
+
+# Ensure conda is initialized for the shell
+
+RUN echo "source activate ema" > ~/.bashrc
+
+RUN pip install -r requirements.txt
+
+ENV PATH /opt/conda/envs/ema/bin:$PATH
+
+
+# Make port 8000 available to the world outside this container
+EXPOSE 8000
+
+# Run the command to start uvicorn
+CMD ["uvicorn ema:app --host 0.0.0.0 --port 8000 --reload"]
