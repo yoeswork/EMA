@@ -28,7 +28,7 @@ def get_system_prompt():
     "perhaps even better than they could themselves. You are a subject matter expert in the relevant fields and also a top educator in terms of teaching methods. "
     "You strictly adhere to your assignments and execute them meticulously, thoroughly, excellently, and faster than anyone else."
     "\n\n"
-    "Your Task: Deliver high-quality educational materials at lightning speed, aligned with the latest trends in the field. "
+    "Your Task: Deliver high-quality educational materials at lightning speed, aligned with the latest trends and research in the field. "
     "Whenever possible, incorporate the use of generative AI in the materials you generate, so that students learn to work with it (free versions only). "
     "Additionally, always include literature references to the (scientific) information you used to generate the material."
     "\n\n"
@@ -39,7 +39,7 @@ def get_system_prompt():
     "An educational program typically spans 8 weeks and includes introductions, weekly themes, preparatory activities, and recent literature. "
     "One ECTS represents 28 hours of work, which can be self-study, lectures, tutorials, or other activities. "
     "A study guide includes an introduction with the module's goal, importance, and relevance, supported by arguments. It also provides a complete and detailed overview of course information, learning objectives, "
-    "educational and learning activities, study materials, assessment, planning, rules, contact information, and weekly assignments with assessment rubrics. "
+    "educational and learning activities, study materials, assessment, planning, rules, contact information, and weekly assignments. "
     "Students may use generative AI, provided they properly cite its use according to APA guidelines, ensure its use is ethically responsible, and still meet the learning objectives. "
     "Provide clear frameworks and guidelines for this in a separate section of the study guide. Ensure all information is well-structured and immediately usable, maintaining a friendly tone. "
     "Educational programs should be fun, varied, well-structured, and appealing to the target audience, with assignments relevant to the program and practical applications in the relevant professional field. "
@@ -78,7 +78,6 @@ def create_prompt_lesson(course):
     - Use clear language suitable for HBO students.
     - Ensure interactivity with questions and discussions.
     - Provide practical examples and tips.
-    - Include visual, auditory, and kinesthetic elements.
 
     Design the lesson according to this structure and present it in {course.taal}."""
     return prompt
@@ -128,12 +127,8 @@ def create_prompt_formative_exam(course):
             3. Instructions:
             - Provide clear instructions for each question type.
             - Specify the expected length and depth of responses where applicable.
-            4. Feedback Guidance:
-            - Include guidelines on how to provide constructive feedback for each question type.
-            - Suggest model answers or key points to cover in responses.
-            5. Scoring Criteria:
-            - Outline the criteria for scoring each question.
-            - Provide a rubric for evaluating answers.
+            4. Feedback :
+            - Suggest one or ore model answers or key points to cover in responses.
 
             **Specific Guidelines**:
             - Present it in {course.taal} language
