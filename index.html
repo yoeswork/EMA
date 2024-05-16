@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate Exam</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .form-container {
+            margin-bottom: 20px;
+        }
+        .result-container {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Generate Exam</h1>
+    <div class="form-container">
+        <form id="examForm">
+            <label for="vak">Course Name:</label><br>
+            <input type="text" id="vak" name="vak" required><br><br>
+            <label for="onderwerp">Subject:</label><br>
+            <input type="text" id="onderwerp" name="onderwerp" required><br><br>
+            <label for="duur">Duration:</label><br>
+            <input type="text" id="duur" name="duur" required><br><br>
+            <label for="ects">ECTS:</label><br>
+            <input type="number" id="ects" name="ects" required><br><br>
+            <label for="voorkennis">Prerequisites:</label><br>
+            <input type="text" id="voorkennis" name="voorkennis" required><br><br>
+            <label for="taal">Language:</label><br>
+            <input type="text" id="taal" name="taal" required><br><br>
+            <button type="submit">Generate Exam</button>
+        </form>
+    </div>
+    <div class="result-container" id="resultContainer">
+        <h2>Exam Result</h2>
+        <pre id="result"></pre>
+    </div>
+
+    <script>
+        document.getElementById('examForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const vak = document.getElementById('vak').value;
+            const onderwerp = document.getElementById('onderwerp').value;
+            const duur = document.getElementById('duur').value;
+            const ects = document.getElementById('ects').value;
+            const voorkennis = document.getElementById('voorkennis').value;
+            const taal = document.getElementById('taal').value;
+            const api_key = 'YOUR_API_KEY_HERE'; // Replace with your actual API key
+
+            const data = {
+                vak: vak,
+                onderwerp: onderwerp,
+                duur: duur,
+                ects: ects,
+                voorkennis: voorkennis,
+                taal: taal,
+                api_key: api_key
+            };
+
+            fetch('/generate_exam', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                document.getElementById('result').textContent = JSON.stringify(result, null, 2);
+                document.getElementById('resultContainer').style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('result').textContent = 'An error occurred. Please try again.';
+                document.getElementById('resultContainer').style.display = 'block';
+            });
+        });
+    </script>
+</body>
+</html>
