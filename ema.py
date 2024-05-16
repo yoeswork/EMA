@@ -8,6 +8,9 @@ import time
 from dotenv import load_dotenv
 #adding uvicorn for loading
 import uvicorn
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
+
 
 app = FastAPI()
 
@@ -21,8 +24,15 @@ class CourseInfo(BaseModel):
     api_key: str
 
 @app.get("/")
-def read_root():
-    return {"message": "Welcome to the EMA API"}
+# def read_root():
+#     return {"message": "Welcome to the EMA API"}
+
+# Mount the static directory to serve static files@
+@app.mount("/static", StaticFiles(directory="static"), name="static")
+
+@app.get("/")
+async def read_root():
+    return FileResponse('static/index.html')
 
 def get_system_prompt():
     return ("Your Role: As an experienced and excellent university lecturer, you deliver high-quality educational material extremely quickly, "
