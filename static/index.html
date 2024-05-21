@@ -67,10 +67,15 @@
                 voorkennis: voorkennis,
                 taal: taal,
                 api_key: api_key
-
             };
 
-            fetch('/generate-exam', {
+            // Initialize result container
+            const resultContainer = document.getElementById('resultContainer');
+            const resultElement = document.getElementById('result');
+            resultContainer.style.display = 'block';
+            resultElement.innerHTML = 'Generating exam...';
+
+            fetch('/generate-exam/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -78,21 +83,22 @@
                 body: JSON.stringify(data)
             })
             .then(response => response.json())
-            .then(result => {
-                if (result.completion) {
-                    const markdownContent = result.completion;
-                    const htmlContent = marked(markdownContent);
-                    document.getElementById('result').innerHTML = htmlContent;
-                    document.getElementById('resultContainer').style.display = 'block';
+            .then(data => {
+                resultElement.innerHTML = '';
+                if (data) {
+                    const markdownContent = JSON.stringify(data, null, 2); // Convert JSON response to string
+                    const jsonData = JSON.parse(markdownContent);
+                    const completion = jsonData.completion;
+                    const htmlContent = marked.parse(completion);
+                    <!-- resultElement.innerHTML = completion; -->
+                    resultElement.innerHTML = htmlContent;
                 } else {
-                    document.getElementById('result').textContent = 'No completion content received.';
-                    document.getElementById('resultContainer').style.display = 'block';
+                    resultElement.textContent = 'No completion content received.';
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                document.getElementById('result').textContent = 'An error occurred. Please try again.';
-                document.getElementById('resultContainer').style.display = 'block';
+                resultElement.textContent = 'An error occurred. Please try again.';
             });
         });
     </script>

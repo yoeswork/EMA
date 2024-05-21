@@ -11,6 +11,7 @@ import uvicorn
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 # from starlette.responses import FileResponse
+import uuid 
 
 app = FastAPI()
 
@@ -187,6 +188,8 @@ def streamed_reply_llama3(prompt, system_prompt):
     output = {"completion": all_events}
     return output
 
+
+
 @app.post("/generate-lesson-plan/")
 def generate_lesson_plan(course: CourseInfo):
     os.environ['REPLICATE_API_TOKEN'] = course.api_key
@@ -224,8 +227,10 @@ def generate_exam(course: CourseInfo):
     return response_json
 
 
+
+
 # For local testing outside of the FastAPI
 if __name__ == "__main__":
     # load_dotenv()
     # generate_exam(CourseInfo(vak="Computer Science", onderwerp="Artificial Intelligence", duur="8 weeks", ects=5, voorkennis="Python programming", taal="English", api_key=os.environ['REPLICATE_API_TOKEN']))
-    uvicorn.run(app, host="0.0.0.0", port=80)
+    uvicorn.run(app, host="0.0.0.0", port=94)
