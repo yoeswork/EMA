@@ -28,7 +28,7 @@ class CourseInfo(BaseModel):
 # #     return {"message": "Welcome to the EMA API"}
 
 # Mount the static directory to serve static files@
-@app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 #show the html in the index.html file at /
 @app.get("/")
