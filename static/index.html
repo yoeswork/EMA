@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generate Exam</title>
+    <title>Generate Content</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -18,14 +18,17 @@
             margin-top: 20px;
             display: none;
         }
+        .button-container {
+            margin-top: 10px;
+        }
     </style>
     <!-- Include the marked library -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
-    <h1>Generate Exam</h1>
+    <h1>Generate Content</h1>
     <div class="form-container">
-        <form id="examForm">
+        <form id="contentForm">
             <label for="vak">Course Name:</label><br>
             <input type="text" id="vak" name="vak" required><br><br>
             <label for="onderwerp">Subject:</label><br>
@@ -40,18 +43,21 @@
             <input type="text" id="taal" name="taal" required><br><br>
             <label for="api_key">API Key:</label><br>
             <input type="text" id="api_key" name="api_key" required><br><br>
-            <button type="submit">Generate Exam</button>
+            <div class="button-container">
+                <button type="button" onclick="generateContent('/generate-lesson-plan/')">Generate Lesson Plan</button>
+                <button type="button" onclick="generateContent('/generate-lesson/')">Generate Lesson</button>
+                <button type="button" onclick="generateContent('/generate-assignment/')">Generate Assignment</button>
+                <button type="button" onclick="generateContent('/generate-exam/')">Generate Exam</button>
+            </div>
         </form>
     </div>
     <div class="result-container" id="resultContainer">
-        <h2>Exam Result</h2>
+        <h2>Result</h2>
         <div id="result"></div>
     </div>
 
     <script>
-        document.getElementById('examForm').addEventListener('submit', function(event) {
-            event.preventDefault();
-
+        function generateContent(endpoint) {
             const vak = document.getElementById('vak').value;
             const onderwerp = document.getElementById('onderwerp').value;
             const duur = document.getElementById('duur').value;
@@ -73,9 +79,9 @@
             const resultContainer = document.getElementById('resultContainer');
             const resultElement = document.getElementById('result');
             resultContainer.style.display = 'block';
-            resultElement.innerHTML = 'Generating exam...';
+            resultElement.innerHTML = 'Generating content. Please wait upto 60 seconds...';
 
-            fetch('/generate-exam/', {
+            fetch(endpoint, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -85,12 +91,9 @@
             .then(response => response.json())
             .then(data => {
                 resultElement.innerHTML = '';
-                if (data) {
-                    const markdownContent = JSON.stringify(data, null, 2); // Convert JSON response to string
-                    const jsonData = JSON.parse(markdownContent);
-                    const completion = jsonData.completion;
-                    const htmlContent = marked.parse(completion);
-                    <!-- resultElement.innerHTML = completion; -->
+                if (data.completion) {
+                    const markdownContent = data.completion;
+                    const htmlContent = marked.parse(markdownContent);
                     resultElement.innerHTML = htmlContent;
                 } else {
                     resultElement.textContent = 'No completion content received.';
@@ -100,7 +103,7 @@
                 console.error('Error:', error);
                 resultElement.textContent = 'An error occurred. Please try again.';
             });
-        });
+        }
     </script>
 </body>
 </html>
